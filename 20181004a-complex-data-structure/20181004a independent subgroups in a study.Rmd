@@ -1,0 +1,58 @@
+---
+title: "20181004a independent subgroups in a study"
+author: "cheungngo"
+date: "October 4, 2018"
+output: word_document
+---
+
+###
+
+Suppose we need to combine the results of two independent subgroups, e.g. treatment1 and treatment2 in a meta-analysis.  e.g. in the OCD-TMS study they did a three arm experiment where both 1Hz, 10Hz and sham has been included
+
+###
+
+### Looking at the data (YBOCS score)
+
+![Y-BOCS for different groups](OCD-TMS.png)
+
+###
+
+### Constructing the functions
+
+```{r}
+m_ind_group = function (n1,n2,m1,m2) {
+  (n1*m1+n2*m2)/(n1+n2)
+}
+```
+
+###
+
+```{r}
+sd_ind_group = function(n1,n2,m1,m2,s1,s2) {
+  sqrt(((n1-1)*s1^2+(n2-1)*s2^2+(n1*n2)/(n1+n2)*(m1-m2)^2)/(n1+n2-1))
+}
+```
+
+###
+
+### Calculation of the 'pre' combined (10Hz and 1Hz) score
+
+```{r}
+pre_m = m_ind_group(15,15,26.7,25.3)
+pre_sd = sd_ind_group(15,15,26.7,25.3,6.5,4.7)
+print(c(pre_m,pre_sd))
+```
+
+###
+
+### Calculation of the 'post' (0 months) combined (10Hz and 1Hz) score
+
+```{r}
+post_m = m_ind_group(15,15,14.7,18.5)
+post_sd = sd_ind_group(15,15,14.7,18.5,5.9,8.5)
+print(c(post_m,post_sd))
+```
+
+###
+
+### The rest would be left to the second part: difference of outcome within study
