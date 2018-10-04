@@ -76,3 +76,15 @@ return(g)
 hedgesg(30,treatment_m,treatment_sd,15,control_m,control_sd)
 ```
 
+### Or one can use the escalc() for the calculation
+
+```{r,message=FALSE}
+library(metafor)
+```
+
+```{r}
+escalc(measure = 'SMD',
+       n1i=30,m1i=treatment_m,sd1i=treatment_sd,
+       n2i=15,m2i=control_m,sd2i=control_sd)
+```
+
