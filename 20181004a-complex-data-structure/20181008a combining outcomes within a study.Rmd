@@ -101,3 +101,4 @@ rownames(results) = c('CBT','SC')
 results
 ```
 
+### For other guidelines for combinations of subscales in schizophrenia, please refer to 'Cognitive–behavioural therapy for the symptoms of schizophrenia: systematic review and meta-analysis with examination of potential bias' p.22
