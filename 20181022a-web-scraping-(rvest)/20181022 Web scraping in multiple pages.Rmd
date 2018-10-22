@@ -1,0 +1,53 @@
+---
+title: "20181022 Web scraping in multiple pages"
+author: "cheungngo"
+date: "22 October 2018"
+output: word_document
+---
+
+```{r, message=FALSE}
+library(rvest)
+```
+
+### Other pre-requisites
+
+```{r, message=FALSE}
+# General-purpose data wrangling
+library(tidyverse)
+```
+
+### List of urls using str_c()
+
+We are here using the cochrane database (as there are packages in r accessing into the Pubmed database)  
+
+Also that the url for each page in Pubmed is very difficult to extract  
+
+With some effort we can find the url for each page  
+
+```{r}
+# For example we are searching for 'schizophrenia' + 'memantine'
+url = 'https://www.cochranelibrary.com/en/search?min_year=&max_year=&custom_min_year=&custom_max_year=&searchBy=1&searchText=schizophrenia+memantine&selectedType=central&isWordVariations=&resultPerPage=25&searchType=basic&orderBy=relevancy&publishDateTo=&publishDateFrom=&publishYearTo=&publishYearFrom=&displayText=&forceTypeSelection=true&p_p_id=scolarissearchresultsportlet_WAR_scolarissearchresults&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&cur='
+list_of_url = str_c(url,1:3)
+list_of_url
+```
+
+### Getting the hyperlinks: html_attr('href') and unique()
+
+Using the Selector Gadget we cannot find any specific identifiers for the title / other details of the papers  
+
+In this case we would use the highlight on the title (And in this case the hyperlinks would be duplicated)
+
+```{r}
+get_hyperlink = function(url) {
+  url %>%
+    read_html() %>%
+    html_nodes('.search-results-item-body , a') %>%
+    html_attr('href')
+}
+```
+
+```{r}
+url = get_hyperlink(list_of_url[1])
+url
+```
+url_all
