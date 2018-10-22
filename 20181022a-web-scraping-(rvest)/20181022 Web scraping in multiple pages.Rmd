@@ -41,7 +41,7 @@ In this case we would use the highlight on the title (And in this case the hyper
 get_hyperlink = function(url) {
   url %>%
     read_html() %>%
-    html_nodes('.search-results-item-body , a') %>%
+    html_nodes(a['https://www.cochranelibrary.com/central/doi/']) %>%
     html_attr('href')
 }
 ```
@@ -50,4 +50,3 @@ get_hyperlink = function(url) {
 url = get_hyperlink(list_of_url[1])
 url
 ```
-url_all
