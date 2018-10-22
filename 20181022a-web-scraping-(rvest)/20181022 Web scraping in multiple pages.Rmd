@@ -18,17 +18,15 @@ library(tidyverse)
 
 ### List of urls using str_c()
 
-We are here using the cochrane database (as there are packages in r accessing into the Pubmed database)  
-
-Also that the url for each page in Pubmed is very difficult to extract  
-
-With some effort we can find the url for each page  
+We are here using the google scholar  
 
 ```{r}
 # For example we are searching for 'schizophrenia' + 'memantine'
-url = 'https://www.cochranelibrary.com/en/search?min_year=&max_year=&custom_min_year=&custom_max_year=&searchBy=1&searchText=schizophrenia+memantine&selectedType=central&isWordVariations=&resultPerPage=25&searchType=basic&orderBy=relevancy&publishDateTo=&publishDateFrom=&publishYearTo=&publishYearFrom=&displayText=&forceTypeSelection=true&p_p_id=scolarissearchresultsportlet_WAR_scolarissearchresults&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&cur='
-list_of_url = str_c(url,1:3)
-list_of_url
+url1 = 'https://scholar.google.com.hk/scholar?start='
+url2 = '&q=schizophrenia+memantine+randomized+controlled+trial&hl=en&as_sdt=0,5'
+start = (1:(8420/10))*10-10
+list_of_url = str_c(url1,start,url2)
+list_of_url[1:5]
 ```
 
 ### Getting the hyperlinks: html_attr('href') and unique()
@@ -41,12 +39,52 @@ In this case we would use the highlight on the title (And in this case the hyper
 get_hyperlink = function(url) {
   url %>%
     read_html() %>%
-    html_nodes(a['https://www.cochranelibrary.com/central/doi/']) %>%
+    html_nodes('.gs_rt a') %>%
     html_attr('href')
 }
 ```
 
+### Getting the title and others
+
 ```{r}
-url = get_hyperlink(list_of_url[1])
-url
+get_title = function(url) {
+  url %>%
+    read_html() %>%
+    html_nodes('.gs_rt a') %>%
+    html_text()
+}
 ```
+
+```{r}
+get_author = function(url) {
+  author = url %>%
+    read_html() %>%
+    html_nodes('.gs_a') %>%
+    html_text()
+  author = gsub(',.*','',author)
+  return(author)
+}
+```
+
+```{r}
+get_all = function(url) {
+  title = get_title(url)
+  author = get_author(url)
+  all = data.frame(Title = title,
+                   Author = author)
+}
+```
+
+
+```{r}
+list_of_url[1:2] %>%
+  map(get_all) %>%
+  bind_rows() %>%
+  write_tsv('testing.tsv')
+  
+```
+
+```{r}
+get_title(list_of_url[1])
+```
+
