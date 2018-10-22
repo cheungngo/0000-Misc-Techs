@@ -1,0 +1,61 @@
+---
+title: "20181022a Selector gadget and simple scraping"
+author: "cheungngo"
+date: "22 October 2018"
+output: word_document
+---
+
+### Pre-requisites
+
+```{r, message=FALSE}
+library(rvest)
+```
+
+https://cran.r-project.org/web/packages/rvest/vignettes/selectorgadget.html  
+Installing the selector gadget in chrome is also important to get the corresponding CSS selector from the desired fields in the webpage to be scraped.  
+
+### Specifying the url and decode by read_html()
+
+```{r}
+url = 'https://www.ncbi.nlm.nih.gov/pubmed/?term=schizophrenia+memantine'
+webpage = read_html(url)
+webpage
+```
+
+### Using the CSS selctor (by the selectorgadget) to scrap the data by html_nodes() and html_text()
+
+```{r}
+# Suppose we are going to get the title  
+# the CSS selector would be '.title' as shown by the selctor gadget
+title_html = html_nodes(webpage, '.title')
+head(title_html)
+# convert the data to text
+title = html_text(title_html)
+head(title)
+```
+
+### Using gsub() to modify scraped data
+
+```{r}
+# scraping the authors of the studies
+# '.desc' as detected by the selector
+author_html = html_nodes(webpage,'.desc')
+author = html_text(author_html)
+head(author)
+```
+
+```{r}
+# Suppose we only want the first author
+author = gsub(',.*','',author)
+author = as.factor(author)
+head(author)
+table(author)
+```
+
+### combining the data into a dataframe
+
+```{r}
+schiz_memantine_df = data.frame(Title = title, Author = author)
+head(schiz_memantine_df)
+```
+
