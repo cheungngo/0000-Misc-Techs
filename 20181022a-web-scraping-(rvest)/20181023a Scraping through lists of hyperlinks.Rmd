@@ -1,0 +1,142 @@
+---
+title: "20181023a Scraping through lists of hyperlinks"
+author: "cheungngo"
+date: "23 October 2018"
+output: word_document
+---
+
+```{r, message=FALSE}
+library(rvest)
+library(tidyverse)
+```
+
+### Drug bank
+
+We are going to search 'calcium channel blocker' in the drug bank
+
+```{r}
+home = 'https://www.drugbank.ca/unearth/q?utf8=%E2%9C%93&searcher=targets&query=calcium+channel+blocker'
+home_html = read_html(home)
+```
+
+### Accessing to the hyperlinks to individual drug groups
+
+```{r}
+home_nodes = html_nodes(home_html,'.hit-link a')
+home_text = html_text(home_nodes)
+home_href = html_attr(home_nodes,'href')
+home_href[1:4]
+```
+
+```{r}
+# We can see the href of the links is missing something
+home_href = str_c('https://www.drugbank.ca',home_href)
+home_href[1:4]
+```
+
+### Selecting the useful hyperlinks
+
+```{r}
+ind = grep('calcium channel',home_text)
+home_text[ind]
+use_href = home_href[ind]
+```
+
+### Scraping the information from each hyperlink
+
+```{r}
+get_text = function(url,css) {
+  url %>%
+    read_html() %>%
+    html_nodes(css) %>%
+    html_text()
+}
+```
+
+```{r}
+get_href = function(url,css) {
+  url %>%
+    read_html() %>%
+    html_nodes(css) %>%
+    html_attr('href')
+}
+```
+
+
+```{r}
+get_all = function(url) {
+  html = read_html(url)
+  name = get_text(url, 'td:nth-child(2) strong')
+  DBID = get_text(url, 'td:nth-child(1) a')
+  status = get_text(url, '#target-relations td:nth-child(3)')
+  href = get_href(url, 'td:nth-child(1) a')
+  combined = data.frame(Name = name,
+                        DBID = DBID,
+                        Status = status,
+                        Link = href)
+  return(combined)
+}
+```
+
+```{r,message=FALSE}
+CCB = use_href %>%
+      map(get_all) %>%
+      bind_rows()
+```
+
+```{r, eval=FALSE}
+write_csv(CCB, 'CCB.csv')
+```
+
+### Reading the resulting table
+
+```{r, message=FALSE, eval=FALSE}
+library(readr)
+CCB <- read_csv("20181022a-web-scraping-(rvest)/CCB.csv")
+```
+
+We can see much duplications here
+
+```{r}
+dim(CCB)
+CCB = unique(CCB)
+dim(CCB)
+```
+
+Also to complete the url
+
+```{r}
+CCB[,4] = sapply(CCB[,4],function(i) {
+  str_c('https://www.drugbank.ca',i)
+})
+```
+
+```{r,eval=FALSE}
+write_csv(CCB,'CCB02.csv')
+```
+
+### Accessing into the details of each drug
+
+```{r}
+get_detail = function(url) {
+  html = read_html(url)
+  mech = get_text(url,'.col-sm-8:nth-child(6) p')
+  data.frame(Pharmacodynamics = mech)
+}
+```
+
+```{r, message=FALSE}
+drug_href = as.vector(sapply(CCB[,4], as.character))
+CCB_details = drug_href %>%
+  map(get_detail) %>%
+  bind_rows()
+```
+
+```{r}
+CCB = bind_cols(CCB,CCB_details)
+```
+
+```{r,eval=FALSE}
+write_csv(CCB, 'CCB03.csv')
+```
+
