@@ -78,16 +78,19 @@ get_all = function(url) {
 }
 ```
 
-```{r,eval=FALSE}
-use_href %>%
-  map(get_all) %>%
-  bind_rows() %>%
-  write_csv('CCB.csv')
+```{r,message=FALSE}
+CCB = use_href %>%
+      map(get_all) %>%
+      bind_rows()
+```
+
+```{r, eval=FALSE}
+write_csv(CCB, 'CCB.csv')
 ```
 
 ### Reading the resulting table
 
-```{r, message=FALSE}
+```{r, message=FALSE, eval=FALSE}
 library(readr)
 CCB <- read_csv("20181022a-web-scraping-(rvest)/CCB.csv")
 ```
@@ -118,17 +121,22 @@ write_csv(CCB,'CCB02.csv')
 get_detail = function(url) {
   html = read_html(url)
   mech = get_text(url,'.col-sm-8:nth-child(6) p')
-  target = get_text(url, '#drug-moa-target-table a')
-  combined = data.frame(Pharmacodynamics = mech,
-                        Targets = target)
+  data.frame(Pharmacodynamics = mech)
 }
 ```
 
-```{r}
+```{r, message=FALSE}
 drug_href = as.vector(sapply(CCB[,4], as.character))
 CCB_details = drug_href %>%
-                  read_html() %>%
-                  get_text('.col-sm-8:nth-child(6) p')
+  map(get_detail) %>%
+  bind_rows()
+```
 
+```{r}
+CCB = bind_cols(CCB,CCB_details)
+```
+
+```{r,eval=FALSE}
+write_csv(CCB, 'CCB03.csv')
 ```
 
