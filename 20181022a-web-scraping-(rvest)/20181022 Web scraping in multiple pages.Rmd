@@ -77,14 +77,13 @@ get_all = function(url) {
 
 
 ```{r}
-list_of_url[1:2] %>%
+testing = list_of_url[1:5] %>%
   map(get_all) %>%
-  bind_rows() %>%
-  write_tsv('testing.tsv')
-  
+  bind_rows() 
+testing[1:5,]
 ```
 
 ```{r}
-get_title(list_of_url[1])
+write_tsv('testing.tsv')
 ```
 
