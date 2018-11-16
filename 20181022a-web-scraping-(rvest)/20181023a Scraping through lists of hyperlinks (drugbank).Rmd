@@ -78,7 +78,7 @@ get_all = function(url) {
 }
 ```
 
-```{r,message=FALSE}
+```{r,message=FALSE,warning=FALSE}
 CCB = use_href %>%
       map(get_all) %>%
       bind_rows()
@@ -125,7 +125,7 @@ get_detail = function(url) {
 }
 ```
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 drug_href = as.vector(sapply(CCB[,4], as.character))
 CCB_details = drug_href %>%
   map(get_detail) %>%
