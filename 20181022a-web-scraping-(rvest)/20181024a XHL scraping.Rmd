@@ -1,0 +1,49 @@
+---
+title: "20181024a XHL scraping"
+author: "cheungngo"
+date: "October 24, 2018"
+output: word_document
+---
+
+https://www.cochranelibrary.com/en/search?min_year=&max_year=&custom_min_year=&custom_max_year=&searchBy=6&searchText=*&selectedType=central&isWordVariations=&resultPerPage=25&searchType=basic&orderBy=relevancy&publishDateTo=&publishDateFrom=&publishYearTo=&publishYearFrom=&displayText=&forceTypeSelection=true&p_p_id=scolarissearchresultsportlet_WAR_scolarissearchresults&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&cur=2
+
+```{r,message=FALSE}
+library(httr)
+library(rvest)
+library(tidyverse)
+```  
+
+```{r}
+query_raw = 'min_year=&max_year=&custom_min_year=&custom_max_year=&searchBy=6&searchText=*&selectedType=central&isWordVariations=&resultPerPage=25&searchType=basic&orderBy=relevancy&publishDateTo=&publishDateFrom=&publishYearTo=&publishYearFrom=&displayText=&forceTypeSelection=true&p_p_id=scolarissearchresultsportlet_WAR_scolarissearchresults&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&'
+query_raw = gsub('=',paste0('=',"'"),query_raw)
+query_raw = gsub('&',paste0("'",', '),query_raw)
+query = query_raw
+query
+```
+
+```{r}
+GET(
+  url = "https://www.cochranelibrary.com/en/",
+  path = 'search',
+  query = list(min_year='', max_year='', custom_min_year='', custom_max_year='', searchBy='6', searchText='*', selectedType='central', isWordVariations='', resultPerPage='25', searchType='basic', orderBy='relevancy', publishDateTo='', publishDateFrom='', publishYearTo='', publishYearFrom='', displayText='', forceTypeSelection='true', p_p_id='scolarissearchresultsportlet_WAR_scolarissearchresults', p_p_lifecycle='0', p_p_state='normal', p_p_mode='view', p_p_col_id='column-1', p_p_col_count='1'),
+  verbose()
+) -> res
+```
+
+```{r}
+get_text = function(url,css) {
+  url %>%
+    read_html() %>%
+    html_nodes(css) %>%
+    html_text()
+}
+```
+
+```{r}
+content(res)
+
+x = tryCatch(x <- res %>%
+             html_nodes(xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "result-title", " " ))]//a') %>%
+             html_text())
+```
+
